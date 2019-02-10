@@ -26,11 +26,15 @@ namespace Endeavor.Supervisor
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("Worker Started");
+
             await Task.Run(() =>
             {
                 _poller.Start(Callback);
 
             });
+
+            _logger.LogInformation("Worker Stopped");
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
