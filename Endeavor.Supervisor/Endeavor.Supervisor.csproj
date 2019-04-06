@@ -10,6 +10,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Endeavor Workflow Supervisor</PackageTags>
     <PackageProjectUrl>https://github.com/keryhe/endeavor-supervisor</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

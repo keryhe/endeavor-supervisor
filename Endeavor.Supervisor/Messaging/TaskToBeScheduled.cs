@@ -8,10 +8,7 @@ namespace Endeavor.Supervisor.Messaging
     public class TaskToBeScheduled
     {
         public long TaskId;
-        public long StepTaskId;
         public int StepId;
-        public string StepName;
-        public int Status;
         public string StepType;
 
         public TaskToBeScheduled()
@@ -26,16 +23,10 @@ namespace Endeavor.Supervisor.Messaging
                 switch(key)
                 {
                     case "ID":
-                        StepTaskId = (long)properties[key];
-                        break;
-                    case "TaskID":
                         TaskId = (long)properties[key];
                         break;
                     case "StepID":
                         StepId = (int)properties[key];
-                        break;
-                    case "StatusID":
-                        Status = (int)properties[key];
                         break;
                     case "StepType":
                         StepType = properties[key].ToString();

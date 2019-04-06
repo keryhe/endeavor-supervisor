@@ -50,22 +50,22 @@ namespace Endeavor.Supervisor.Service
                     services.AddTransient<IDal, SupervisorDal>();
 
                     services.AddTransient<ReadyTaskPoller>();
-                    services.AddTransient<OvertimeTaskPoller>();
-                    services.AddTransient<Func<TaskPoller, IPoller<TaskToBeScheduled>>>(sp => className =>
+                    services.AddTransient<LateTaskPoller>();
+                    services.AddTransient<Func<string, IPoller<TaskToBeScheduled>>>(sp => className =>
                     {
                         switch (className)
                         {
-                            case TaskPoller.Ready:
+                            case "ready":
                                 return sp.GetService<ReadyTaskPoller>();
-                            case TaskPoller.Overtime:
-                                return sp.GetService<OvertimeTaskPoller>();
+                            case "late":
+                                return sp.GetService<LateTaskPoller>();
                             default:
                                 throw new KeyNotFoundException();
                         }
                     });
 
                     services.AddSingleton<IHostedService, ReadyTaskWorker>();
-                    services.AddSingleton<IHostedService, OvertimeTaskWorker>();
+                    services.AddSingleton<IHostedService, LateTaskWorker>();
 
                 })
                 .ConfigureLogging((hostingContext, logging) =>

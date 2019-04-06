@@ -20,32 +20,61 @@ namespace Endeavor.Supervisor.Persistence
         public List<TaskToBeScheduled> GetTasksByStatus(StatusType status)
         {
             List<TaskToBeScheduled> results = new List<TaskToBeScheduled>();
-            /*
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("@StatusID", (int)status);
 
-            List<Dictionary<string, object>> tasks = Query("GetStepTasksByStatus", CommandType.StoredProcedure, parameters);
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                { "@Status", (int)status }
+            };
+
+            List<Dictionary<string, object>> tasks = Query("GetTasksByStatus", CommandType.StoredProcedure, parameters);
 
             foreach (Dictionary<string, object> task in tasks)
             {
                 results.Add(new TaskToBeScheduled(task));
             }
-            */
+            
             return results;
         }
 
-        public List<TaskToBeScheduled> GetTasksInOvertime()
+        public List<TaskToBeScheduled> GetLateTasks()
         {
             List<TaskToBeScheduled> results = new List<TaskToBeScheduled>();
-            /*
-            List<Dictionary<string, object>> tasks = Query("GetStepTasksByStatus", CommandType.StoredProcedure, null);
+            
+            List<Dictionary<string, object>> tasks = Query("GetLateTasks", CommandType.StoredProcedure, null);
 
             foreach (Dictionary<string, object> task in tasks)
             {
                 results.Add(new TaskToBeScheduled(task));
             }
-            */
+            
             return results;
+        }
+
+        public void UpdateTaskStatus(long taskID, StatusType status)
+        {
+            int statusValue = (int)status;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("UPDATE Task SET StatusValue = ");
+            sb.Append(statusValue.ToString());
+            sb.Append(" WHERE TaskID = ");
+            sb.Append(taskID.ToString());
+
+            _provider.ExecuteNonQuery(sb.ToString(), CommandType.Text);
+        }
+
+        public void UpdateTasksStatuses(List<long> taskIDs, StatusType status)
+        {
+            string tasks = string.Join(",", taskIDs);
+
+            int statusValue = (int)status;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("UPDATE Task SET StatusValue = ");
+            sb.Append(statusValue.ToString());
+            sb.Append(" WHERE TaskID in (");
+            sb.Append(tasks);
+            sb.Append(")");
+
+            _provider.ExecuteNonQuery(sb.ToString(), CommandType.Text);
         }
 
         private List<Dictionary<string, object>> Query(string name, System.Data.CommandType commandType, Dictionary<string, object> parameters)

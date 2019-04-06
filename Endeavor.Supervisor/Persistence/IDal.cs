@@ -8,14 +8,15 @@ namespace Endeavor.Supervisor.Persistence
     public interface IDal
     {
         List<TaskToBeScheduled> GetTasksByStatus(StatusType status);
-        List<TaskToBeScheduled> GetTasksInOvertime();
-
-
+        List<TaskToBeScheduled> GetLateTasks();
+        void UpdateTaskStatus(long taskID, StatusType status);
+        void UpdateTasksStatuses(List<long> taskIDs, StatusType status);
     }
 
     public enum StatusType
     {
-        Ready = 1,
+        Ready,
+        Queued,
         Processing,
         Waiting,
         Complete,

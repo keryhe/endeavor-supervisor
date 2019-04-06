@@ -7,12 +7,12 @@ using System.Collections.Generic;
 
 namespace Endeavor.Supervisor.Polling
 {
-    public class OvertimeTaskPoller : Poller<TaskToBeScheduled>
+    public class LateTaskPoller : Poller<TaskToBeScheduled>
     {
-        private readonly ILogger<OvertimeTaskPoller> _logger;
+        private readonly ILogger<LateTaskPoller> _logger;
         private readonly IDal _dal;
 
-        public OvertimeTaskPoller(IDelay delay, IDal dal, ILogger<OvertimeTaskPoller> logger)
+        public LateTaskPoller(IDelay delay, IDal dal, ILogger<LateTaskPoller> logger)
             :base(delay, logger)
         {
             _logger = logger;
@@ -21,9 +21,9 @@ namespace Endeavor.Supervisor.Polling
 
         protected override List<TaskToBeScheduled> Poll()
         {
-            _logger.LogDebug("Polling for overtime tasks");
+            _logger.LogDebug("Polling for late tasks");
 
-            List<TaskToBeScheduled> results = _dal.GetTasksInOvertime();
+            List<TaskToBeScheduled> results = _dal.GetLateTasks();
 
             return results;
         }

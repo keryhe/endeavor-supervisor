@@ -1,4 +1,5 @@
 ﻿using Endeavor.Supervisor.Messaging;
+using Endeavor.Supervisor.Persistence;
 using Endeavor.Supervisor.Polling;
 using Keryhe.Messaging;
 using Keryhe.Polling;
@@ -11,22 +12,24 @@ using System.Threading.Tasks;
 
 namespace Endeavor.Supervisor
 {
-    public class Worker : BackgroundService
+    public class ReadyTaskWorker : BackgroundService
     {
         private readonly IPoller<TaskToBeScheduled> _poller;
+        private readonly IDal _dal;
         private readonly IMessagePublisher<TaskToBeScheduled> _publisher;
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger<ReadyTaskWorker> _logger;
 
-        public Worker(IPoller<TaskToBeScheduled> poller, IMessagePublisher<TaskToBeScheduled> publisher, ILogger<Worker> logger)
+        public ReadyTaskWorker(Func<string, IPoller<TaskToBeScheduled>> pollAccessor, IDal dal, IMessagePublisher<TaskToBeScheduled> publisher, ILogger<ReadyTaskWorker> logger)
         {
-            _poller = poller;
+            _poller = pollAccessor("ready");
+            _dal = dal;
             _publisher = publisher;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Worker Started");
+            _logger.LogInformation("ReadyTaskWorker Started");
 
             await Task.Run(() =>
             {
@@ -34,7 +37,7 @@ namespace Endeavor.Supervisor
 
             });
 
-            _logger.LogInformation("Worker Stopped");
+            _logger.LogInformation("ReadyTaskWorker Stopped");
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
@@ -49,26 +52,12 @@ namespace Endeavor.Supervisor
         {
             foreach (TaskToBeScheduled message in messages)
             {
-                _logger.LogDebug("publish message");
+                _dal.UpdateTaskStatus(message.TaskId, StatusType.Queued);
+
+                _logger.LogDebug("Send Task to Scheduler");
                 _publisher.Send(message);
             }
 
-        }
-    }
-
-    public class ReadyTaskWorker : Worker
-    {
-        public ReadyTaskWorker(Func<TaskPoller, IPoller<TaskToBeScheduled>> pollAccessor, IMessagePublisher<TaskToBeScheduled> publisher, ILogger<Worker> logger)
-            : base(pollAccessor(TaskPoller.Ready), publisher, logger)
-        {
-        }
-    }
-
-    public class OvertimeTaskWorker : Worker
-    {
-        public OvertimeTaskWorker(Func<TaskPoller, IPoller<TaskToBeScheduled>> pollAccessor, IMessagePublisher<TaskToBeScheduled> publisher, ILogger<Worker> logger)
-            : base(pollAccessor(TaskPoller.Overtime), publisher, logger)
-        {
         }
     }
 }
