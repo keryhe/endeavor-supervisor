@@ -17,9 +17,9 @@ namespace Endeavor.Supervisor.Persistence
             _provider = provider;
         }
 
-        public List<TaskToBeScheduled> GetTasksByStatus(StatusType status)
+        public List<TaskToBeWorked> GetTasksByStatus(StatusType status)
         {
-            List<TaskToBeScheduled> results = new List<TaskToBeScheduled>();
+            List<TaskToBeWorked> results = new List<TaskToBeWorked>();
 
             Dictionary<string, object> parameters = new Dictionary<string, object>
             {
@@ -30,21 +30,7 @@ namespace Endeavor.Supervisor.Persistence
 
             foreach (Dictionary<string, object> task in tasks)
             {
-                results.Add(new TaskToBeScheduled(task));
-            }
-            
-            return results;
-        }
-
-        public List<TaskToBeScheduled> GetLateTasks()
-        {
-            List<TaskToBeScheduled> results = new List<TaskToBeScheduled>();
-            
-            List<Dictionary<string, object>> tasks = Query("GetLateTasks", CommandType.StoredProcedure, null);
-
-            foreach (Dictionary<string, object> task in tasks)
-            {
-                results.Add(new TaskToBeScheduled(task));
+                results.Add(new TaskToBeWorked(task));
             }
             
             return results;

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Endeavor.Supervisor.Polling
 {
-    public class ReadyTaskPoller : Poller<TaskToBeScheduled>
+    public class ReadyTaskPoller : Poller<TaskToBeWorked>
     {
         private readonly ILogger<ReadyTaskPoller> _logger;
         private readonly IDal _dal;
@@ -19,11 +19,11 @@ namespace Endeavor.Supervisor.Polling
             _dal = dal;
         }
 
-        protected override List<TaskToBeScheduled> Poll()
+        protected override List<TaskToBeWorked> Poll()
         {
             _logger.LogDebug("Polling for ready tasks");
 
-            List<TaskToBeScheduled> results = _dal.GetTasksByStatus(StatusType.Ready);
+            List<TaskToBeWorked> results = _dal.GetTasksByStatus(StatusType.Ready);
 
             return results;
         }

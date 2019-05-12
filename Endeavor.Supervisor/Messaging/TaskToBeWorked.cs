@@ -5,18 +5,18 @@ using System.Text;
 namespace Endeavor.Supervisor.Messaging
 {
     [Serializable]
-    public class TaskToBeScheduled
+    public class TaskToBeWorked
     {
         public long TaskId;
         public int StepId;
         public string StepType;
 
-        public TaskToBeScheduled()
+        public TaskToBeWorked()
         {
 
         }
 
-        public TaskToBeScheduled(Dictionary<string, object> properties)
+        public TaskToBeWorked(Dictionary<string, object> properties)
         {
             foreach (string key in properties.Keys)
             {
