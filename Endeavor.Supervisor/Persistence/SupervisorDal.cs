@@ -42,7 +42,7 @@ namespace Endeavor.Supervisor.Persistence
             StringBuilder sb = new StringBuilder();
             sb.Append("UPDATE Task SET StatusValue = ");
             sb.Append(statusValue.ToString());
-            sb.Append(" WHERE TaskID = ");
+            sb.Append(" WHERE ID = ");
             sb.Append(taskID.ToString());
 
             _provider.ExecuteNonQuery(sb.ToString(), CommandType.Text);
@@ -56,14 +56,14 @@ namespace Endeavor.Supervisor.Persistence
             StringBuilder sb = new StringBuilder();
             sb.Append("UPDATE Task SET StatusValue = ");
             sb.Append(statusValue.ToString());
-            sb.Append(" WHERE TaskID in (");
+            sb.Append(" WHERE ID in (");
             sb.Append(tasks);
             sb.Append(")");
 
             _provider.ExecuteNonQuery(sb.ToString(), CommandType.Text);
         }
 
-        private List<Dictionary<string, object>> Query(string name, System.Data.CommandType commandType, Dictionary<string, object> parameters)
+        private List<Dictionary<string, object>> Query(string name, CommandType commandType, Dictionary<string, object> parameters)
         {
             List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
 

@@ -16,6 +16,7 @@ namespace Endeavor.Supervisor
         private readonly IDal _dal;
         private readonly IMessagePublisher<TaskToBeWorked> _publisher;
         private readonly ILogger<Supervisor> _logger;
+        private ManualResetEvent _resetEvent = new ManualResetEvent(false);
 
         public Supervisor(IPoller<TaskToBeWorked> poller, IDal dal, IMessagePublisher<TaskToBeWorked> publisher, ILogger<Supervisor> logger)
         {
@@ -32,7 +33,7 @@ namespace Endeavor.Supervisor
             await Task.Run(() =>
             {
                 _poller.Start(Callback);
-
+                _resetEvent.WaitOne();
             });
 
             _logger.LogInformation("ReadyTaskWorker Stopped");
@@ -43,6 +44,7 @@ namespace Endeavor.Supervisor
             _poller.Stop();
             _poller.Dispose();
             _publisher.Dispose();
+            _resetEvent.Set();
             await base.StopAsync(cancellationToken);
         }
 
@@ -52,7 +54,7 @@ namespace Endeavor.Supervisor
             {
                 _dal.UpdateTaskStatus(message.TaskId, StatusType.Queued);
 
-                _logger.LogDebug("Send Task to Scheduler");
+                _logger.LogDebug("Send Task to Worker");
                 _publisher.Send(message);
             }
 
