@@ -45,7 +45,11 @@ namespace Endeavor.Supervisor.Persistence
             sb.Append(" WHERE ID = ");
             sb.Append(taskID.ToString());
 
-            _provider.ExecuteNonQuery(sb.ToString(), CommandType.Text);
+            using (IDbConnection connection = _provider.CreateConnection())
+            {
+                connection.Open();
+                _provider.ExecuteNonQuery(connection, sb.ToString(), CommandType.Text);
+            }
         }
 
         public void UpdateTasksStatuses(List<long> taskIDs, StatusType status)
@@ -60,34 +64,42 @@ namespace Endeavor.Supervisor.Persistence
             sb.Append(tasks);
             sb.Append(")");
 
-            _provider.ExecuteNonQuery(sb.ToString(), CommandType.Text);
+            using (IDbConnection connection = _provider.CreateConnection())
+            {
+                connection.Open();
+                _provider.ExecuteNonQuery(connection, sb.ToString(), CommandType.Text);
+            }
         }
 
         private List<Dictionary<string, object>> Query(string name, CommandType commandType, Dictionary<string, object> parameters)
         {
             List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
 
-            using (var reader = _provider.ExecuteQuery(name, commandType, parameters))
+            using (IDbConnection connection = _provider.CreateConnection())
             {
-                while (reader.Read())
+                connection.Open();
+                using (var reader = _provider.ExecuteQuery(connection, name, commandType, parameters))
                 {
-                    Dictionary<string, object> result = new Dictionary<string, object>();
-
-                    var columns = Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToList();
-
-                    foreach (var column in columns)
+                    while (reader.Read())
                     {
-                        object columnValue = reader[column];
-                        if (columnValue == DBNull.Value)
+                        Dictionary<string, object> result = new Dictionary<string, object>();
+
+                        var columns = Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToList();
+
+                        foreach (var column in columns)
                         {
-                            result.Add(column, null);
+                            object columnValue = reader[column];
+                            if (columnValue == DBNull.Value)
+                            {
+                                result.Add(column, null);
+                            }
+                            else
+                            {
+                                result.Add(column, columnValue);
+                            }
                         }
-                        else
-                        {
-                            result.Add(column, columnValue);
-                        }
+                        results.Add(result);
                     }
-                    results.Add(result);
                 }
             }
             return results;
